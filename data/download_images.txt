@@ -1,0 +1,317 @@
+# Image Download with Web Scraper API
+
+The Web Scraper API supports downloading images in multiple formats (JPEG, SVG, PNG) through different integration methods, with specific handling for each approach.
+
+## Supported Image Formats
+
+- **JPEG**: Standard image format for photographs and complex images
+- **SVG**: Scalable Vector Graphics for icons and simple graphics  
+- **PNG**: Portable Network Graphics for images with transparency
+
+## Integration Method 1: Proxy Endpoint
+
+The simplest method for downloading images using the Proxy Endpoint integration.
+
+### Direct Download Example
+```bash
+curl -k -x realtime.oxylabs.io:60000 -U "USERNAME:PASSWORD" \
+"https://sandbox.oxylabs.io/assets/action-adventure.svg" >> image.svg
+```
+
+### How Proxy Endpoint Works
+- **Direct streaming**: Image data flows directly to your local file
+- **Simple saving**: Use standard output redirection (`>>`) to save files
+- **Immediate access**: No additional processing required
+- **Format preservation**: Original image format maintained
+
+### Use Cases for Proxy Endpoint
+- **Quick downloads**: Single images or small batches
+- **Simple integration**: Minimal code changes to existing proxy setups
+- **Format flexibility**: Works with any image format supported by the source
+- **Direct file saving**: Stream directly to disk without memory buffering
+
+## Integration Method 2: Realtime and Push-Pull APIs
+
+For Realtime and Push-Pull integration methods, image content requires base64 encoding/decoding.
+
+### Required Parameter
+Add the `content_encoding` parameter with value `base64` to your request:
+
+```json
+{
+    "source": "universal",
+    "url": "https://example.com/image.jpg",
+    "content_encoding": "base64"
+}
+```
+
+### Python Implementation Example
+
+```python
+import base64
+import json
+import requests
+
+# Your API credentials
+USERNAME = 'your_username'
+PASSWORD = 'your_password'
+
+# Image URL to download
+URL_IMAGE = 'https://sandbox.oxylabs.io/assets/action-adventure.svg'
+
+# Realtime API endpoint
+API_URL = f'http://{USERNAME}:{PASSWORD}@realtime.oxylabs.io/v1/queries'
+
+def dump_to_file(filename: str, data: bytes):
+    """Save binary data to file"""
+    with open(filename, 'wb') as file:
+        file.write(data)
+
+def download_image(image_url: str, output_filename: str):
+    """Download and save image using Web Scraper API"""
+    parameters = {
+        'source': 'universal',
+        'url': image_url,
+        'content_encoding': 'base64',
+    }
+    
+    try:
+        response = requests.post(API_URL, json=parameters, timeout=60)
+        
+        if response.ok:
+            data = json.loads(response.text)
+            content_base64 = data['results'][0]['content']
+            
+            # Decode base64 encoded data into bytes
+            content = base64.b64decode(content_base64)
+            dump_to_file(output_filename, content)
+            print(f"Image saved as {output_filename}")
+        else:
+            print(f"Failed to download image: {response.text}")
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+    except (KeyError, IndexError) as e:
+        print(f"Response parsing error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+def main():
+    download_image(URL_IMAGE, 'out.svg')
+
+if __name__ == '__main__':
+    main()
+```
+
+## Advanced Image Download Features
+
+### Batch Image Download
+```python
+def batch_download_images(image_urls: list, output_directory: str = './images/'):
+    """Download multiple images in batch"""
+    import os
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_directory, exist_ok=True)
+    
+    for i, url in enumerate(image_urls):
+        # Extract filename from URL or use index
+        filename = url.split('/')[-1] if '/' in url else f'image_{i}.jpg'
+        output_path = os.path.join(output_directory, filename)
+        
+        print(f"Downloading {url}...")
+        download_image(url, output_path)
+
+# Example usage
+image_urls = [
+    'https://example.com/image1.jpg',
+    'https://example.com/image2.png',
+    'https://example.com/image3.svg'
+]
+batch_download_images(image_urls)
+```
+
+### Format-Specific Handling
+```python
+def get_image_format(url: str) -> str:
+    """Determine image format from URL"""
+    url_lower = url.lower()
+    if url_lower.endswith('.jpg') or url_lower.endswith('.jpeg'):
+        return 'jpeg'
+    elif url_lower.endswith('.png'):
+        return 'png'
+    elif url_lower.endswith('.svg'):
+        return 'svg'
+    else:
+        return 'unknown'
+
+def download_with_format_validation(image_url: str):
+    """Download image with format validation"""
+    image_format = get_image_format(image_url)
+    
+    if image_format == 'unknown':
+        print(f"Warning: Unknown image format for {image_url}")
+    
+    filename = f"downloaded_image.{image_format}"
+    download_image(image_url, filename)
+```
+
+## Error Handling and Best Practices
+
+### Comprehensive Error Handling
+```python
+def robust_image_download(image_url: str, output_filename: str, max_retries: int = 3):
+    """Download image with retry logic and comprehensive error handling"""
+    import time
+    
+    for attempt in range(max_retries):
+        try:
+            parameters = {
+                'source': 'universal',
+                'url': image_url,
+                'content_encoding': 'base64',
+            }
+            
+            response = requests.post(API_URL, json=parameters, timeout=60)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'results' in data and len(data['results']) > 0:
+                    content_base64 = data['results'][0]['content']
+                    content = base64.b64decode(content_base64)
+                    dump_to_file(output_filename, content)
+                    print(f"Successfully downloaded {output_filename}")
+                    return True
+                else:
+                    print(f"No results in response for {image_url}")
+            else:
+                print(f"HTTP {response.status_code}: {response.text}")
+                
+        except requests.exceptions.Timeout:
+            print(f"Attempt {attempt + 1}: Timeout occurred")
+        except requests.exceptions.ConnectionError:
+            print(f"Attempt {attempt + 1}: Connection error")
+        except Exception as e:
+            print(f"Attempt {attempt + 1}: Unexpected error: {e}")
+        
+        if attempt < max_retries - 1:
+            time.sleep(2 ** attempt)  # Exponential backoff
+    
+    print(f"Failed to download {image_url} after {max_retries} attempts")
+    return False
+```
+
+### Performance Optimization
+
+#### Memory-Efficient Processing
+```python
+def memory_efficient_download(image_url: str, output_filename: str):
+    """Download large images without loading entire content into memory"""
+    parameters = {
+        'source': 'universal',
+        'url': image_url,
+        'content_encoding': 'base64',
+    }
+    
+    response = requests.post(API_URL, json=parameters, stream=True)
+    
+    if response.ok:
+        data = response.json()
+        content_base64 = data['results'][0]['content']
+        
+        # Process in chunks to handle large images
+        chunk_size = 8192
+        with open(output_filename, 'wb') as f:
+            decoded_content = base64.b64decode(content_base64)
+            f.write(decoded_content)
+```
+
+#### Concurrent Downloads
+```python
+import concurrent.futures
+import threading
+
+def concurrent_image_download(image_urls: list, max_workers: int = 5):
+    """Download multiple images concurrently"""
+    def download_single(url_filename_pair):
+        url, filename = url_filename_pair
+        return robust_image_download(url, filename)
+    
+    # Create filename for each URL
+    url_filename_pairs = [
+        (url, f"image_{i}_{url.split('/')[-1]}") 
+        for i, url in enumerate(image_urls)
+    ]
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = list(executor.map(download_single, url_filename_pairs))
+    
+    successful_downloads = sum(results)
+    print(f"Successfully downloaded {successful_downloads}/{len(image_urls)} images")
+```
+
+## Use Cases and Applications
+
+### E-commerce Image Collection
+- **Product catalogs**: Download product images from competitor websites
+- **Inventory management**: Collect images for product databases
+- **Quality analysis**: Compare product images across platforms
+
+### Content Management
+- **Asset collection**: Gather images for content creation
+- **Backup creation**: Download images for archival purposes
+- **Format conversion**: Convert between different image formats
+
+### Research and Analysis
+- **Visual data collection**: Gather images for computer vision projects
+- **Trend analysis**: Collect visual content for market research
+- **Documentation**: Create visual documentation from web sources
+
+## Security and Compliance
+
+### Image Source Validation
+```python
+def validate_image_source(url: str) -> bool:
+    """Validate image source before downloading"""
+    allowed_domains = ['example.com', 'trusted-source.org']
+    
+    from urllib.parse import urlparse
+    domain = urlparse(url).netloc
+    
+    return any(allowed_domain in domain for allowed_domain in allowed_domains)
+```
+
+### Content Type Verification
+```python
+def verify_content_type(response_data: dict) -> bool:
+    """Verify that downloaded content is actually an image"""
+    content_base64 = response_data['results'][0]['content']
+    content = base64.b64decode(content_base64)
+    
+    # Check for common image file signatures
+    image_signatures = {
+        b'\xFF\xD8\xFF': 'jpeg',
+        b'\x89\x50\x4E\x47': 'png',
+        b'<svg': 'svg'
+    }
+    
+    for signature, format_type in image_signatures.items():
+        if content.startswith(signature):
+            return True
+    
+    return False
+```
+
+## Troubleshooting
+
+### Common Issues
+- **Empty files**: Check content_encoding parameter is set correctly
+- **Corrupted images**: Verify base64 decoding process
+- **Timeout errors**: Increase timeout for large images
+- **Memory issues**: Use streaming for very large images
+
+### Debug Tips
+- **Verify credentials**: Test with simple web page first
+- **Check image URLs**: Ensure URLs are accessible
+- **Monitor file sizes**: Compare downloaded vs expected sizes
+- **Test different formats**: Ensure your code handles all required formats

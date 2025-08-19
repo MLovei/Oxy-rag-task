@@ -1,0 +1,10 @@
+services:
+  rag_app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEB_CONCURRENCY=1
+    volumes:
+      - .:/app

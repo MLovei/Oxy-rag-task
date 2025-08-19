@@ -1,0 +1,53 @@
+# Restricted Targets
+
+Some websites are restricted on the Web Scraper API to prevent misuse and ensure responsible usage.
+
+## Important Note
+
+**Some targets can be unblocked after going through a short KYC (Know Your Customer) procedure.** Contact the Customer Support Team at support@oxylabs.io if your target falls under the mentioned groups to ensure you can access the target before purchasing.
+
+## Restricted Website Categories
+
+The list includes but is not limited to the following categories and examples:
+
+| Category | Example Websites |
+|----------|------------------|
+| **Entertainment & Streaming** | Spotify, Twitch, Disney |
+| **Financial/Banking & Crypto** | Stripe, Binance |
+| **Government Websites** | usa.gov, canada.ca |
+| **Gaming Platforms** | Steam |  
+| **Professional & Social Networks** | LinkedIn |
+| **Ticketing Services** | Ticketmaster, Eventim, SeatGeek |
+
+## Getting Access to Restricted Targets
+
+If you need to scrape any restricted websites:
+
+1. **Contact Support**: Reach out before purchasing to confirm access
+2. **KYC Process**: Complete the Know Your Customer verification procedure
+3. **Business Justification**: Provide legitimate business use case documentation
+4. **Compliance Review**: Allow time for Oxylabs to review your request
+
+## Support Channels
+
+- **Email**: support@oxylabs.io
+- **Live Chat**: Available 24/7 on the Oxylabs website
+- **Response Time**: Typically within 24 hours for restriction queries
+
+## Compliance and Responsible Usage
+
+These restrictions exist to:
+- **Prevent Misuse**: Ensure the API is used for legitimate business purposes
+- **Legal Compliance**: Maintain adherence to website terms of service and applicable laws
+- **Platform Protection**: Preserve access to important platforms for all users
+- **Risk Management**: Minimize potential legal and technical risks
+
+## Alternative Solutions
+
+For restricted targets, consider:
+- **Official APIs**: Many platforms offer official APIs for data access
+- **Partnership Programs**: Direct partnerships with data providers
+- **Public Datasets**: Freely available data sources
+- **Custom Solutions**: Tailored approaches through Oxylabs professional services
+
+Always consult your legal advisors and carefully read website terms of service before engaging in any scraping activities.

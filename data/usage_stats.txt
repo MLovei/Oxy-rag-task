@@ -1,0 +1,148 @@
+# Usage Statistics API
+
+You can check your usage statistics free of charge by submitting an API request to monitor your Web Scraper API consumption.
+
+## Endpoint
+
+```
+GET https://data.oxylabs.io/v2/stats
+```
+
+## Request Parameters
+
+By default, the API returns unfiltered (all-time, all sources) usage statistics. You can get grouped and/or filtered stats by combining multiple parameters in the same query.
+
+| Parameter | Description | Valid Values | Example |
+|-----------|-------------|--------------|---------|
+| `group_by` | Show daily, monthly or yearly usage stats (instead of total stats) | `day`, `month`, `year` | `?group_by=day` |
+| `date_from` | Lower date boundary (best used with `date_to`) | Date in `Y-m-d` format | `?date_from=2022-01-17` |
+| `date_to` | Upper date boundary (best used with `date_from`) | Date in `Y-m-d` format | `?date_to=2022-06-17` |
+| `source` | Get usage statistics for a specific source | Any valid source value | `?source=universal` |
+| `product` | Get usage statistics for a specific product (legacy users only) | `serp_scraper_api`, `ecommerce_scraper_api`, `web_scraper_api` | `?product=serp_scraper_api` |
+
+**Note**: The `product` filter is only applicable for legacy users (accounts created before September 25, 2024) who use the same username to access multiple Scraper APIs.
+
+## Request Examples
+
+### Get Monthly Statistics
+```bash
+curl --user "user:pass1" 'https://data.oxylabs.io/v2/stats?group_by=month'
+```
+
+### Python Example
+```python
+import requests
+from pprint import pprint
+
+# Get response from stats endpoint
+response = requests.request(
+    method='GET',
+    url='https://data.oxylabs.io/v2/stats',
+    auth=('user', 'pass1'),
+)
+
+# Print prettified JSON response to stdout
+pprint(response.json())
+```
+
+### PHP Example
+```php
+<?php
+
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, "https://data.oxylabs.io/v2/stats");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($ch, CURLOPT_USERPWD, "user" . ":" . "pass1");
+
+$result = curl_exec($ch);
+echo $result;
+
+if (curl_errno($ch)) {
+    echo 'Error:' . curl_error($ch);
+}
+curl_close ($ch);
+?>
+```
+
+## Response Structure
+
+The `v2/stats` output contains usage statistics including product-level stats (E-Commerce Scraper API / SERP Scraper API / Web Scraper API). Product-level stats are broken down into source-level stats, which are further divided into HTML and parsed results statistics.
+
+### Sample Response
+```json
+{
+    "meta": {
+        "group_by": null,
+        "date_from": null,
+        "date_to": null,
+        "source": null,
+        "product": null
+    },
+    "data": {
+        "products": [
+            {
+                "all_count": 5837,
+                "mode_callback_count": 5514,
+                "mode_realtime_count": 315,
+                "mode_superapi_count": 8,
+                "contenttype_parsed_count": 56,
+                "contenttype_html_count": 5781,
+                "render_count": 3,
+                "geo_location_count": 2330,
+                "average_response_time": 88.54,
+                "request_traffic": 4685091,
+                "response_traffic": 602064208,
+                "title": "serp_scraper_api",
+                "sources": [
+                    {
+                        "all_count": 5616,
+                        "mode_callback_count": 5414,
+                        "mode_realtime_count": 194,
+                        "mode_superapi_count": 8,
+                        "render_count": 0,
+                        "geo_location_count": 2190,
+                        "average_response_time": 91.59,
+                        "request_traffic": 4550507,
+                        "response_traffic": 585423946,
+                        "title": "serp_source1",
+                        "parsed": false
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+## Response Field Definitions
+
+| Field | Description | Type |
+|-------|-------------|------|
+| `meta` | Container of all submitted query parameters | JSON object |
+| `data` | Container of all statistics data | JSON object |
+| `products` | List of product-level statistics objects | JSON array |
+| `all_count` | Total amount of results | Integer |
+| `mode_callback_count` | Results fulfilled via Push-Pull integration method | Integer |
+| `mode_realtime_count` | Results fulfilled via Realtime integration method | Integer |
+| `mode_superapi_count` | Results fulfilled via Proxy Endpoint integration method | Integer |
+| `contenttype_parsed_count` | Amount of parsed results | Integer |
+| `contenttype_html_count` | Amount of HTML results | Integer |
+| `render_count` | Results fulfilled with JavaScript execution | Integer |
+| `geo_location_count` | Results fulfilled with user-defined `geo_location` parameter | Integer |
+| `average_response_time` | Average response time in seconds | Float |
+| `request_traffic` | Total request traffic in bytes | Integer |
+| `response_traffic` | Total response traffic in bytes | Integer |
+| `title` | Product or source name | String |
+| `sources` | List of sources belonging to a particular product | JSON array |
+| `parsed` | Indicates whether data pertains to parsed results | Boolean |
+
+## Usage Monitoring Benefits
+
+- **Cost Tracking**: Monitor your API consumption and costs
+- **Performance Analysis**: Track response times and traffic patterns
+- **Integration Method Analysis**: Compare efficiency of different integration methods
+- **Geographic Usage**: Monitor geo-location parameter usage
+- **Data Type Analysis**: Compare HTML vs parsed result consumption
+- **Source-Level Insights**: Detailed breakdown by specific scrapers used

@@ -1,0 +1,137 @@
+# Web Scraper API - Getting Started
+
+Web Scraper API is an all-in-one web data collection platform. It covers every stage of web scraping, from crawling URLs and bypassing IP blocks to precise data parsing and delivery to your preferred cloud storage. Extract data from search engines, e-commerce sites, travel platforms, and any other website.
+
+## Authentication Setup
+
+**Create your API user credentials**: Sign up for a free trial or purchase the product in the Oxylabs dashboard to create your API user credentials (`USERNAME` and `PASSWORD`).
+
+**Note**: If you need more than one API user for your account, please contact customer support or message the 24/7 live chat support.
+
+## Request Examples
+
+Below are sample cURL requests for different platforms:
+
+### Amazon Product Request
+```bash
+curl 'https://realtime.oxylabs.io/v1/queries' \
+--user "USERNAME:PASSWORD" \
+-H "Content-Type: application/json" \
+-d '{
+        "source": "amazon_product",
+        "query": "B07FZ8S74R",
+        "geo_location": "90210",
+        "parse": true
+    }'
+```
+
+### Google Search Request
+```bash
+curl 'https://realtime.oxylabs.io/v1/queries' \
+--user 'USERNAME:PASSWORD' \
+-H 'Content-Type: application/json' \
+-d '{
+        "source": "google_search",
+        "query": "adidas",
+        "geo_location": "California,United States",
+        "parse": true
+    }'
+```
+
+### Universal/Generic Website Request
+```bash
+curl 'https://realtime.oxylabs.io/v1/queries' \
+--user 'USERNAME:PASSWORD' \
+-H 'Content-Type: application/json' \
+-d '{
+        "source": "universal",
+        "url": "https://sandbox.oxylabs.io/"
+    }'
+```
+
+**Integration Methods**: These examples use synchronous **Realtime** integration method. You can also use **Proxy Endpoint** or asynchronous **Push-Pull** integration methods.
+
+## Request Parameters
+
+### Required Parameters
+1. **source** - Sets the scraper that will be used to process your request
+2. **URL** or **query** - Provide the `URL` or `query` for the type of page you want to scrape
+
+### Optional Parameters
+You can include additional parameters such as:
+- `geo_location` - Geographic targeting
+- `user_agent_type` - Browser type simulation
+- `parse` - Enable structured data parsing
+- `render` - JavaScript rendering options
+
+## Supported Sources and Targets
+
+### URL-based vs Query-based Scraping
+Oxylabs supports two general groups of inputs:
+- **URLs**: Direct website scraping using `universal` source
+- **Parametrized inputs**: Queries, product IDs, or video IDs using specialized sources
+
+### Major Platforms Supported
+
+| Platform | URL Source | Specialized Sources |
+|----------|------------|-------------------|
+| **Amazon** | `amazon` | `amazon_product`, `amazon_search`, `amazon_pricing`, `amazon_sellers`, `amazon_bestsellers`, `amazon_reviews`, `amazon_questions` |
+| **Google** | `google` | `google_search`, `google_ads`, `google_ai_mode`, `google_lens`, `google_maps`, `google_travel_hotels`, `google_suggest`, `google_trends_explore`, `google_shopping_product`, `google_shopping_search`, `google_shopping_pricing` |
+| **Bing** | `bing` | `bing_search` |
+| **YouTube** | `universal` | `youtube_transcript`, `youtube_search`, `youtube_metadata`, `youtube_downloader` |
+| **Walmart** | `universal` | `walmart_search`, `walmart_product` |
+| **eBay** | `universal` | `ebay_search` |
+
+### North American E-commerce
+- **Kroger**: `kroger_product`, `kroger_search`
+- **Lowe's**: `lowes_search`, `lowes_product`
+- **Best Buy**: `bestbuy_search`, `bestbuy_product`
+- **Target**: `target_search`, `target_product`
+- **Costco**: `costco_search`
+- **Staples**: `staples_search`
+- **Petco**: `petco_search`
+- **Grainger**: `grainger_search`
+- **Instacart**: `instacart_search`
+
+### European E-commerce
+- **Allegro**: `allegro_search`, `allegro_product`
+- **MediaMarkt**: `mediamarkt_search`
+- **Cdiscount**: `cdiscount_search`
+
+### Latin American E-commerce
+- **MercadoLibre**: `mercadolibre_search`
+- **MercadoLivre**: `mercadolivre_search`
+- **Falabella**: `falabella_search`
+
+### Asian E-commerce
+- **Alibaba**: `alibaba_search`
+- **AliExpress**: `aliexpress_search`
+- **Flipkart**: `flipkart_search`
+- **Rakuten**: `rakuten_search`
+- **SHEIN**: `shein_search`
+- **Tokopedia**: `tokopedia_search`
+
+### AI Platforms
+- **ChatGPT**: `chatgpt`
+- **Perplexity**: `perplexity`
+
+### Generic Websites
+- **Other Websites**: Use `universal` source with URL parameter
+
+## Testing Options
+
+### Scraper APIs Playground
+Try Web Scraper API and OxyCopilot in the Scraper APIs Playground available in the Oxylabs dashboard.
+
+### Postman Integration
+Download the Web Scraper API Postman collection to test the API using Postman. The collection includes examples that demonstrate the functionality of the scraper.
+
+## Support and Resources
+
+- **24/7 Live Chat**: Available for assistance with your first request
+- **Customer Support**: Contact support@oxylabs.io for additional help
+- **Documentation**: Comprehensive guides available for specific platforms and features
+
+## Legal Notice
+
+All information is provided on an "as is" basis for informational purposes only. Before engaging in scraping activities, consult your legal advisors and carefully read the particular website's terms of service or receive a scraping license.

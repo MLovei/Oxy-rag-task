@@ -1,0 +1,279 @@
+# Cloud Storage Integration
+
+Web Scraper API job results are stored in Oxylabs storage by default. You can retrieve results by making GET requests to the `/results` endpoint.
+
+Alternatively, you can configure automatic upload to your cloud storage, eliminating the need for additional requests to fetch results - everything goes directly to your storage bucket.
+
+## Important Requirements
+
+**Cloud storage integration works only with Push-Pull integration method.** It is not available with Realtime or Proxy Endpoint methods.
+
+## Supported Cloud Storage Services
+
+- **Google Cloud Storage (GCS)**
+- **Amazon S3**
+- **Alibaba Cloud Object Storage Service (OSS)**
+- **Other S3-compatible storage**
+
+For different storage types not listed above, contact your account manager to discuss feature delivery timeline.
+
+## Upload Path Structure
+
+Results are uploaded using this path format: `YOUR_BUCKET_NAME/job_ID.json`
+
+The job ID is provided in the response you receive after submitting a job.
+
+## Request Parameters
+
+| Parameter | Description | Valid Values |
+|-----------|-------------|--------------|
+| `storage_type` | Your cloud storage type | `gcs` (Google Cloud Storage), `s3` (AWS S3), `s3_compatible` (any S3-compatible storage) |
+| `storage_url` | Your cloud storage bucket name/URL | Any `s3` or `gcs` bucket name; Any `s3-compatible` storage URL |
+
+## Google Cloud Storage Setup
+
+### Basic Request Example
+```json
+{
+    "source": "universal",
+    "query": "https://example.com",
+    "storage_type": "gcs",
+    "storage_url": "bucket_name/path"
+}
+```
+
+### Required Permissions Setup
+
+To enable automatic uploads to your Google Cloud Storage bucket, configure these permissions:
+
+#### Step 1: Create Custom Role
+1. Go to Google Cloud Console → IAM & Admin → Roles
+2. Click "Create Role"
+3. Add the required permission (see Step 2)
+
+#### Step 2: Add Storage Permission
+Add the `storage.objects.create` permission to your custom role.
+
+#### Step 3: Assign Role to Oxylabs
+1. Go to your bucket's IAM settings
+2. Click "Add Members"
+3. In the "New members" field, enter the Oxylabs service account email:
+```
+oxyserps-storage@oxyserps-storage.iam.gserviceaccount.com
+```
+4. Assign your custom role with the `storage.objects.create` permission
+
+## Amazon S3 Setup
+
+### Basic Request Example
+```json
+{
+    "source": "universal",
+    "query": "https://example.com",
+    "storage_type": "s3",
+    "storage_url": "bucket_name/path"
+}
+```
+
+### Required Bucket Policy Setup
+
+1. Go to Amazon S3 Console → S3 → Storage → Your Bucket Name
+2. Navigate to Permissions → Bucket Policy
+3. Apply the following bucket policy (replace `YOUR_BUCKET_NAME` with your actual bucket name):
+
+```json
+{
+    "Version": "2012-10-17",
+    "Id": "Policy1577442634787",
+    "Statement": [
+        {
+            "Sid": "Stmt1577442633719",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::324311890426:user/oxylabs.s3.uploader"
+            },
+            "Action": "s3:GetBucketLocation",
+            "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+        },
+        {
+            "Sid": "Stmt1577442633719",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::324311890426:user/oxylabs.s3.uploader"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+        }
+    ]
+}
+```
+
+### What This Policy Allows
+- **Write access**: Oxylabs can upload results to your bucket
+- **File permissions**: Proper access control for uploaded files
+- **Bucket location**: Oxylabs can determine bucket location for optimization
+
+## Alibaba Cloud OSS Setup
+
+### Basic Request Example
+```json
+{
+    "source": "universal",
+    "query": "https://example.com",
+    "storage_type": "s3_compatible",
+    "storage_url": "https://ACCESS_KEY_ID:ACCESS_KEY_SECRET@BUCKET_NAME.oss-REGION.aliyuncs.com/FOLDER_NAME"
+}
+```
+
+### Storage URL Format
+```
+https://ACCESS_KEY_ID:ACCESS_KEY_SECRET@BUCKET_NAME.oss-REGION.aliyuncs.com/FOLDER_NAME
+```
+
+**Important**: Currently, uploads to root bucket are not supported. You must provide a specific folder name.
+
+### Finding Bucket Information
+Locate your `BUCKET_NAME` and `oss-REGION` in the Alibaba Cloud Console:
+- Bucket name is displayed in the bucket list
+- Region appears in the bucket overview (e.g., `oss-us-west-1`)
+
+### Access Key Creation Process
+
+#### Step 1: Access the AccessKey Menu
+Navigate to your Alibaba Cloud account settings and select AccessKey management.
+
+#### Step 2: Access RAM Console
+1. Log in to the RAM console using your Alibaba Cloud account or RAM user with admin rights
+2. Use this URL: https://ram.console.aliyun.com/
+
+#### Step 3: Create RAM User
+1. Go to Identities → Users in the left navigation
+2. Click "Create User"
+3. Enable "RAM User AccessKey" option
+
+#### Step 4: Grant Permissions
+The newly created RAM user has no permissions by default. You must:
+1. Grant **AliyunOSSFullAccess** permissions to the RAM user
+2. This allows the user to access required Alibaba Cloud resources
+3. Refer to Alibaba's documentation for detailed permission granting steps
+
+#### Step 5: Generate Access Keys
+1. Return to the Authentication section
+2. In the Access Key section, select "Create AccessKey"
+3. Choose to create an Access Key for "Third-Party service"
+4. Save the `ACCESS_KEY_ID` and `ACCESS_KEY_SECRET` for your requests
+
+### Rate Limit Considerations
+
+When performing concurrent uploads to Alibaba OSS, you may encounter account/bucket rate limits. If uploads start timing out with rate limit errors:
+
+1. **Contact Alibaba Support**: Request rate limit increases for your OSS account
+2. **Implement backoff**: Add delays between concurrent requests
+3. **Monitor performance**: Track upload success rates and adjust accordingly
+
+## Other S3-Compatible Storage
+
+For S3-compatible storage solutions, include your authentication credentials directly in the storage URL:
+
+### Request Example
+```json
+{
+    "source": "universal",
+    "url": "https://example.com",
+    "storage_type": "s3_compatible",
+    "storage_url": "https://ACCESS_KEY:SECRET@s3.oxylabs.io/my-videos"
+}
+```
+
+### URL Format
+```
+https://ACCESS_KEY:SECRET@your-s3-endpoint.com/bucket-name/path
+```
+
+## Best Practices
+
+### Security Considerations
+- **Minimal Permissions**: Grant only necessary permissions to Oxylabs service accounts
+- **Access Key Rotation**: Regularly rotate access keys and update configurations
+- **Bucket Policies**: Use restrictive bucket policies that limit access to specific resources
+- **Monitor Usage**: Track storage access and uploads for security auditing
+
+### Performance Optimization
+- **Region Selection**: Choose storage regions close to Oxylabs infrastructure for faster uploads
+- **Folder Organization**: Use logical folder structures for better organization
+- **Concurrent Limits**: Respect cloud provider concurrent upload limits
+- **Monitoring**: Monitor upload success rates and adjust configurations as needed
+
+### Cost Management
+- **Storage Classes**: Use appropriate storage classes for your data retention needs
+- **Lifecycle Policies**: Implement lifecycle policies to manage data retention and costs
+- **Transfer Optimization**: Minimize cross-region data transfer costs
+- **Usage Monitoring**: Track storage usage and associated costs
+
+## Troubleshooting
+
+### Common Issues
+
+#### Authentication Failures
+- **Verify credentials**: Double-check access keys and permissions
+- **Check service accounts**: Ensure Oxylabs service accounts are properly configured
+- **Permission scope**: Verify permissions include all necessary actions
+
+#### Upload Failures
+- **Bucket permissions**: Confirm bucket policies allow Oxylabs access
+- **Network connectivity**: Check for network issues or firewall restrictions
+- **Rate limits**: Monitor for rate limiting and implement appropriate delays
+
+#### Configuration Errors
+- **URL format**: Verify storage URL format matches requirements
+- **Folder paths**: Ensure folder paths exist and are accessible
+- **Region settings**: Confirm region settings match your storage configuration
+
+### Getting Support
+- **Oxylabs Support**: Contact support@oxylabs.io for API-related issues
+- **Cloud Provider Support**: Contact your cloud provider for storage-specific issues
+- **Documentation**: Refer to cloud provider documentation for detailed setup instructions
+
+## Integration Examples
+
+### Multi-Cloud Setup
+```python
+import requests
+
+# Configuration for different cloud providers
+cloud_configs = {
+    'gcs': {
+        'storage_type': 'gcs',
+        'storage_url': 'my-gcs-bucket/scraped-data'
+    },
+    's3': {
+        'storage_type': 's3',
+        'storage_url': 'my-s3-bucket/scraped-data'
+    },
+    'alibaba': {
+        'storage_type': 's3_compatible',
+        'storage_url': 'https://ACCESS_KEY:SECRET@bucket.oss-region.aliyuncs.com/data'
+    }
+}
+
+def submit_job_with_storage(provider='s3'):
+    payload = {
+        'source': 'universal',
+        'url': 'https://example.com',
+        'storage_type': cloud_configs[provider]['storage_type'],
+        'storage_url': cloud_configs[provider]['storage_url']
+    }
+    
+    response = requests.post(
+        'https://data.oxylabs.io/v1/queries',
+        auth=('username', 'password'),
+        json=payload
+    )
+    
+    return response.json()
+```
+
+This comprehensive setup ensures reliable, secure, and efficient automatic upload of your Web Scraper API results to your preferred cloud storage solution.

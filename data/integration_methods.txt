@@ -1,0 +1,132 @@
+# Integration Methods
+
+Web Scraper API supports three integration methods, each with unique benefits for different use cases.
+
+## Method 1: Realtime Integration
+
+**Type**: Synchronous  
+**Endpoint**: `https://realtime.oxylabs.io/v1/queries`
+
+### How it Works
+- Send job submission request and keep connection open
+- Wait until job completion or error response
+- Receive results immediately in the same request
+
+### Best Use Cases
+- Single requests requiring immediate results
+- JSON payloads with scraping and parsing job descriptions
+- Advanced scraping parameters and configurations
+- Interactive applications needing real-time responses
+
+### Characteristics
+- **Connection**: Must remain open throughout job processing
+- **Response Time**: Immediate upon job completion
+- **Suitable For**: Small to medium-scale scraping tasks
+- **Maximum Wait**: 150 seconds (TTL limit)
+
+## Method 2: Push-Pull Integration (Recommended)
+
+**Type**: Asynchronous  
+**Endpoint**: `https://data.oxylabs.io/v1/queries`
+
+### How it Works
+1. Submit job and receive immediate response with job info
+2. Get URLs for result download and status checking
+3. Receive POST notification when job completes
+4. Download results when ready
+
+### Best Use Cases
+- **Batch Queries**: Process multiple requests efficiently
+- **Large-Scale Operations**: Handle high-volume data extraction
+- **Background Processing**: Queue jobs without blocking application
+- **Cloud Storage Integration**: Direct upload to AWS S3 or Google Cloud Storage
+
+### Key Features
+- **Batch Support**: Submit up to 5,000 queries per batch
+- **Cloud Integration**: Automatic upload to your storage bucket
+- **Callback Notifications**: POST notifications to your server
+- **Result Storage**: 24-hour result availability
+- **Scalability**: Best for large amounts of data
+
+### Characteristics
+- **Connection**: Quick job submission, no waiting
+- **Response Time**: Variable, with notification system
+- **Suitable For**: Enterprise-scale scraping operations
+- **Storage Options**: Internal storage or direct cloud upload
+
+## Method 3: Proxy Endpoint
+
+**Type**: Synchronous  
+**Usage**: Standard HTTP proxy configuration
+
+### How it Works
+- Configure application to use Oxylabs endpoint as HTTP proxy
+- Send regular HTTP requests through the proxy
+- Receive unblocked content directly
+
+### Best Use Cases
+- **Existing Proxy Users**: Familiar with proxy configuration
+- **Simple Unblocking**: Just need to bypass restrictions
+- **Legacy Applications**: Integrate with existing proxy-based systems
+- **Direct Content Access**: Get raw HTML without API overhead
+
+### Configuration
+- **Proxy Server**: `pr.oxylabs.io:7777` (varies by endpoint)
+- **Authentication**: Username:Password in proxy auth
+- **Protocol**: Standard HTTP/HTTPS proxy protocol
+
+### Characteristics
+- **Connection**: Synchronous like Realtime
+- **Interface**: Proxy protocol instead of REST API
+- **Response**: Direct website content
+- **Integration**: Minimal code changes needed
+
+## Connection and Timeout Information
+
+### TTL (Time-To-Live) Settings
+- **All API Connections**: 150 seconds maximum
+- **Timeout Factors**: System load, job complexity
+- **Rare Cases**: Connections may timeout before response
+
+### Timeout Handling
+- **Monitor Connection**: Implement timeout detection
+- **Retry Logic**: Automatic retry for failed requests
+- **Error Handling**: Graceful handling of timeout errors
+
+## Choosing the Right Method
+
+### Use Realtime When:
+- You need immediate results
+- Processing single requests
+- Building interactive applications
+- Working with small to medium datasets
+
+### Use Push-Pull When:
+- Processing large volumes of data
+- Running background jobs
+- Using batch operations
+- Requiring cloud storage integration
+- Building enterprise-scale applications
+
+### Use Proxy Endpoint When:
+- You have existing proxy-based systems
+- Need simple website unblocking
+- Want minimal integration effort
+- Working with legacy applications
+
+## Integration Best Practices
+
+### Performance Optimization
+- **Batch Requests**: Use Push-Pull for multiple queries
+- **Connection Pooling**: Reuse connections when possible
+- **Timeout Management**: Implement proper timeout handling
+
+### Error Handling
+- **Retry Mechanisms**: Automatic retry for transient failures
+- **Status Monitoring**: Track job status in Push-Pull method
+- **Graceful Degradation**: Fallback strategies for failures
+
+### Scalability Considerations
+- **Rate Limiting**: Respect API rate limits
+- **Resource Management**: Monitor usage statistics
+- **Load Distribution**: Distribute requests across time

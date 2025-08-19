@@ -1,0 +1,169 @@
+# Model Context Protocol (MCP) Integration
+
+The Model Context Protocol (MCP) integration with Oxylabs Web Scraper API enables the delivery of structured, AI-ready data optimized for large language model (LLM) workflows.
+
+MCP ensures that context, metadata, and instructions are correctly formatted, allowing LLMs such as Anthropic's Claude to interpret and utilize the data effectively.
+
+## What is MCP?
+
+Model Context Protocol is a standardized way to connect LLMs with external data sources and tools. It provides:
+- **Structured Data Delivery**: Optimized format for LLM consumption
+- **Context Preservation**: Maintains metadata and instructions
+- **Tool Integration**: Seamless connection between APIs and AI models
+- **Enhanced Output**: Better quality responses from properly formatted data
+
+## Prerequisites
+
+Before you start, ensure you have:
+- **Claude Desktop** installed (available at claude.ai/download)
+- **Oxylabs API credentials** (USERNAME and PASSWORD)
+- **Node.js and npm** installed for package management
+
+## Installation Methods
+
+### Method 1: Using Smithery.ai (Recommended)
+
+Smithery provides automated installation for Claude Desktop integration.
+
+#### Setup Steps
+1. **Update npm** to the latest version:
+```bash
+npm install -g npm
+```
+
+2. **Install Oxylabs MCP server** automatically:
+```bash
+npx -y @smithery/cli install @oxylabs/oxylabs-mcp --client claude
+```
+
+3. **Enter credentials** when prompted:
+   - API Username: `your_username`
+   - API Password: `your_password`
+
+4. **Open Claude Desktop** and start using MCP-enhanced outputs
+
+### Method 2: Using UV Package Manager
+
+UV provides an alternative installation method with manual configuration.
+
+#### Configuration Steps
+1. **Install UV** following the official installation guide
+2. **Update Claude Desktop config** file `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "oxylabs_mcp": {
+      "command": "uvx",
+      "args": ["oxylabs-mcp"],
+      "env": {
+        "OXYLABS_USERNAME": "your_username",
+        "OXYLABS_PASSWORD": "your_password"
+      }
+    }
+  }
+}
+```
+
+3. **Replace credentials** with your actual Oxylabs API user credentials
+4. **Save and restart** Claude Desktop to apply settings
+
+## IDE Integration: Cursor Setup
+
+For developers using Cursor IDE (requires version 0.45.6+):
+
+### Configuration Steps
+1. **Open Cursor Settings**
+2. **Navigate to** Features → MCP Servers
+3. **Add New MCP Server** with these settings:
+   - **Name**: "oxylabs" (or preferred name)
+   - **Type**: "command"  
+   - **Command**: `env OXYLABS_USERNAME=your-username OXYLABS_PASSWORD=your-password npx -y oxylabs-mcp`
+
+### Windows Users
+If experiencing issues on Windows, use this alternative command:
+```bash
+cmd /c "set OXYLABS_USERNAME=your-username && set OXYLABS_PASSWORD=your-password && npx -y oxylabs-mcp"
+```
+
+### Using Cursor Composer
+1. **Access Composer** via Command+L (Mac) or Ctrl+L (Windows)
+2. **Select "Agent"** next to the submit button
+3. **Describe your web scraping needs** - the system will automatically use Oxylabs when appropriate
+
+## MCP Benefits for Web Scraping
+
+### Enhanced Data Quality
+- **Structured Output**: Data formatted specifically for LLM processing
+- **Context Preservation**: Maintains source information and metadata
+- **Error Handling**: Improved error reporting and recovery
+
+### Seamless Integration
+- **Automatic Detection**: LLMs recognize when to use web scraping
+- **Natural Language**: Request scraping using conversational queries
+- **Tool Selection**: AI chooses appropriate scraping methods automatically
+
+### Workflow Optimization
+- **One-Step Process**: Scraping and analysis in single workflow
+- **Real-Time Processing**: Immediate LLM analysis of scraped data
+- **Chain Operations**: Connect multiple data sources and analyses
+
+## Usage Examples
+
+### Basic Web Scraping Request
+```
+"Please scrape the pricing information from example-ecommerce.com and analyze the trends"
+```
+
+### Multi-Source Analysis
+```
+"Compare product reviews from Amazon and competitor sites for iPhone 15 Pro"
+```
+
+### Structured Data Extraction
+```
+"Extract contact information from company websites in the tech industry"
+```
+
+## Supported Features
+
+### Web Scraper API Capabilities
+- **Universal Scraping**: Any website using `universal` source
+- **Platform-Specific**: Amazon, Google, eBay, Walmart, and others
+- **Advanced Parameters**: Geo-location, user agents, parsing options
+- **Multiple Formats**: HTML, parsed JSON, structured data
+
+### LLM Integration Benefits
+- **Context Awareness**: AI understands data source and structure
+- **Intelligent Analysis**: Automatic insights and pattern recognition  
+- **Cross-Reference**: Compare data from multiple sources
+- **Natural Queries**: Use conversational language for complex requests
+
+## Best Practices
+
+### Credential Security
+- **Environment Variables**: Store credentials securely
+- **Regular Rotation**: Update passwords periodically
+- **Access Control**: Limit API user permissions to necessary functions
+
+### Efficient Usage
+- **Specific Requests**: Be precise about data requirements
+- **Batch Operations**: Group related scraping tasks
+- **Cache Results**: Reuse scraped data when appropriate
+
+### Error Handling
+- **Monitor Responses**: Check for rate limits and errors
+- **Fallback Strategies**: Have alternatives for restricted sites
+- **Retry Logic**: Implement automatic retry for transient failures
+
+## Troubleshooting
+
+### Common Issues
+- **Credential Errors**: Verify username and password accuracy
+- **Network Issues**: Check internet connectivity and firewall settings
+- **Version Conflicts**: Ensure compatible versions of all components
+
+### Getting Support
+- **GitHub Repository**: Check oxylabs/oxylabs-mcp for examples and issues
+- **Oxylabs Support**: Contact support@oxylabs.io for API-related questions  
+- **Community Forums**: Claude and Cursor communities for integration help

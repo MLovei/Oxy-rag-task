@@ -1,0 +1,8 @@
+"How do I authenticate with the Web Scraper API?"
+"What are the different integration methods?"
+"What does error code 429 mean?"
+"How do I scrape Amazon products?"
+"What is the timeout for realtime requests?"
+"How do I handle authentication errors?"
+"What parameters are required for requests?"
+"How do I use the Push-Pull integration method?"

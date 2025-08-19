@@ -1,0 +1,273 @@
+# LangChain Integration with Web Scraper API
+
+The LangChain integration with Oxylabs Web Scraper API enables you to collect and process web data through an LLM (Large Language Model) in the same workflow.
+
+## Overview
+
+LangChain is a framework for building applications that use LLMs alongside tools, APIs, and web data. It supports both Python and JavaScript and provides powerful capabilities when combined with Oxylabs Web Scraper API:
+
+### Key Benefits
+- **Scrape structured data** without handling CAPTCHAs, IP blocks, or JS rendering
+- **Process results with LLM** in the same pipeline
+- **Build end-to-end workflows** from extraction to AI-powered output
+- **Seamless integration** between web scraping and language processing
+
+## Prerequisites and Setup
+
+### API Credentials
+Create your API user credentials by signing up for a free trial or purchasing the product in the Oxylabs dashboard to get your `USERNAME` and `PASSWORD`.
+
+**Note**: If you need more than one API user for your account, contact customer support or message the 24/7 live chat support.
+
+### Required Libraries
+Install the required Python libraries:
+```bash
+pip install -qU langchain-oxylabs langchain-openai langgraph requests python-dotenv
+```
+
+### Environment Configuration
+Create a `.env` file in your project directory:
+```env
+OXYLABS_USERNAME=your-username
+OXYLABS_PASSWORD=your-password
+OPENAI_API_KEY=your-openai-key
+```
+
+Load environment variables in your Python script:
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+```
+
+## Integration Methods
+
+### Method 1: Using langchain-oxylabs Package
+
+For Google search queries, use the dedicated `langchain-oxylabs` package:
+
+```python
+import os
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from langgraph.prebuilt import create_react_agent
+from langchain_oxylabs import OxylabsSearchAPIWrapper, OxylabsSearchRun
+
+load_dotenv()
+
+# Initialize your preferred LLM model
+llm = init_chat_model(
+    "gpt-4o-mini",
+    model_provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
+# Initialize the Google search tool
+search = OxylabsSearchRun(
+    wrapper=OxylabsSearchAPIWrapper(
+        oxylabs_username=os.getenv("OXYLABS_USERNAME"),
+        oxylabs_password=os.getenv("OXYLABS_PASSWORD")
+    )
+)
+
+# Create an agent that uses the Google search tool
+agent = create_react_agent(llm, [search])
+
+# Example usage
+user_input = "When and why did the Maya civilization collapse?"
+response = agent.invoke({"messages": user_input})
+print(response["messages"][-1].content)
+```
+
+### Method 2: Direct Web Scraper API Integration
+
+For accessing websites beyond Google search, directly use the Web Scraper API:
+
+```python
+import os
+import requests
+from dotenv import load_dotenv
+from langchain_openai import OpenAI
+from langchain_core.prompts import PromptTemplate
+
+load_dotenv()
+
+def scrape_website(url):
+    """Scrape the website using Oxylabs Web Scraper API"""
+    payload = {
+        "source": "universal",
+        "url": url,
+        "parse": True
+    }
+    response = requests.post(
+        "https://realtime.oxylabs.io/v1/queries",
+        auth=(os.getenv("OXYLABS_USERNAME"), os.getenv("OXYLABS_PASSWORD")),
+        json=payload
+    )
+
+    if response.status_code == 200:
+        data = response.json()
+        content = data["results"][0]["content"]
+        return str(content)
+    else:
+        print(f"Failed to scrape website: {response.text}")
+        return None
+
+def process_content(content):
+    """Process the scraped content using LangChain"""
+    if not content:
+        print("No content to process.")
+        return None
+
+    prompt = PromptTemplate.from_template(
+        "Analyze the following website content and summarize key points: {content}"
+    )
+    chain = prompt | OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    result = chain.invoke({"content": content})
+    return result
+
+def main(url):
+    print("Scraping website...")
+    scraped_content = scrape_website(url)
+    if scraped_content:
+        print("Processing scraped content with LangChain...")
+        analysis = process_content(scraped_content)
+        print("\nProcessed Analysis:\n", analysis)
+    else:
+        print("No content scraped.")
+
+if __name__ == "__main__":
+    url = "https://sandbox.oxylabs.io/products/1"
+    main(url)
+```
+
+## Target-Specific Scrapers
+
+Oxylabs provides specialized scrapers for popular websites:
+
+| Website | Source Parameter | Required Parameters |
+|---------|------------------|-------------------|
+| Google | `google_search` | `query` |
+| Amazon | `amazon_search` | `query`, `domain` (optional) |
+| Walmart | `walmart_search` | `query` |
+| Target | `target_search` | `query` |
+| Kroger | `kroger_search` | `query`, `store_id` |
+| Staples | `staples_search` | `query` |
+
+### Example: Amazon Search Integration
+```python
+# Modify the payload for Amazon-specific scraping
+payload = {
+    "source": "amazon_search",
+    "query": "smartphone",
+    "domain": "com",
+    "parse": True
+}
+```
+
+## Advanced Configuration Options
+
+### JavaScript Rendering
+Handle dynamic content by enabling JavaScript rendering:
+```python
+payload = {
+    "source": "universal",
+    "url": url,
+    "parse": True,
+    "render": "html"
+}
+```
+
+### User Agent Simulation
+Simulate different devices with user agent types:
+```python
+payload = {
+    "source": "universal",
+    "url": url,
+    "parse": True,
+    "render": "html",
+    "user_agent_type": "mobile"
+}
+```
+
+### Target-Specific Parameters
+Use additional parameters for specialized scrapers:
+```python
+# Example for Kroger with location-specific parameters
+payload = {
+    "source": "kroger_search",
+    "query": "organic milk",
+    "store_id": "01100002",
+    "fulfillment_type": "pickup"
+}
+```
+
+## Error Handling and Best Practices
+
+### Comprehensive Error Handling
+```python
+try:
+    response = requests.post(
+        "https://realtime.oxylabs.io/v1/queries",
+        auth=(os.getenv("OXYLABS_USERNAME"), os.getenv("OXYLABS_PASSWORD")),
+        json=payload,
+        timeout=60
+    )
+    response.raise_for_status()
+    # Process response
+except requests.exceptions.HTTPError as http_err:
+    print(f"HTTP error occurred: {http_err}")
+except requests.exceptions.ConnectionError as conn_err:
+    print(f"Connection error occurred: {conn_err}")
+except requests.exceptions.Timeout as timeout_err:
+    print(f"Timeout error occurred: {timeout_err}")
+except requests.exceptions.RequestException as req_err:
+    print(f"An error occurred: {req_err}")
+```
+
+### Performance Optimization
+- **Timeout Management**: Set appropriate timeout values (60 seconds recommended)
+- **Rate Limiting**: Implement delays between requests if needed
+- **Caching**: Store frequently accessed content to reduce API calls
+- **Batch Processing**: Group related requests when possible
+
+### Security Best Practices
+- **Environment Variables**: Never hardcode credentials in source code
+- **Credential Rotation**: Regularly update API credentials
+- **Access Control**: Use dedicated API users with minimal required permissions
+
+## Use Cases and Applications
+
+### Content Analysis Pipeline
+1. **Scrape content** from target websites
+2. **Extract key information** using LangChain processing
+3. **Generate insights** with LLM analysis
+4. **Store results** in structured format
+
+### Competitive Intelligence
+- **Monitor competitor websites** for pricing and product updates
+- **Analyze market trends** from multiple data sources
+- **Generate comparative reports** using AI analysis
+
+### Research Automation
+- **Gather information** from academic and news sources
+- **Summarize findings** using natural language processing
+- **Create knowledge bases** with structured extracted data
+
+## Troubleshooting Common Issues
+
+### Authentication Problems
+- Verify credentials in `.env` file
+- Check API user status in Oxylabs dashboard
+- Ensure proper environment variable loading
+
+### Request Failures
+- Monitor rate limits and usage statistics
+- Implement retry logic for transient failures
+- Check target website accessibility and restrictions
+
+### LangChain Integration
+- Verify compatible package versions
+- Test components separately before combining
+- Review LangChain documentation for framework updates

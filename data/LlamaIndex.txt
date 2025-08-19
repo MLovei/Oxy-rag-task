@@ -1,0 +1,309 @@
+# LlamaIndex Integration with Web Scraper API
+
+The LlamaIndex integration with Oxylabs Web Scraper API enables you to scrape and process web data through an LLM (Large Language Model) in the same workflow, building powerful data-driven applications.
+
+## Overview
+
+LlamaIndex is a data framework designed for building LLM applications with external data sources. When combined with Oxylabs Web Scraper API, it provides:
+
+### Core Capabilities
+- **Scrape structured data** without handling CAPTCHAs, IP blocks, or JS rendering
+- **Process results with LLM** in the same pipeline
+- **Build end-to-end workflows** from extraction to AI-powered output
+- **Create vector indices** from web content for semantic search
+- **RAG Applications**: Retrieval-Augmented Generation with web data
+
+## Prerequisites and Setup
+
+### API Credentials
+Create your API user credentials by signing up for a free trial or purchasing the product in the Oxylabs dashboard to get your `USERNAME` and `PASSWORD`.
+
+**Note**: If you need more than one API user for your account, contact customer support or message the 24/7 live chat support.
+
+### Environment Setup
+Install the required Python libraries:
+```bash
+pip install -qU llama-index llama-index-readers-oxylabs llama-index-readers-web
+```
+
+Create a `.env` file in your project directory:
+```env
+OXYLABS_USERNAME=your_API_username
+OXYLABS_PASSWORD=your_API_password
+OPENAI_API_KEY=your-openai-key
+```
+
+Load environment variables in your Python script:
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+```
+
+## Integration Methods
+
+### Method 1: Oxylabs Reader Classes
+
+The `llama-index-readers-oxylabs` module provides specialized classes for different data sources:
+
+| API Data Source | Reader Class | Purpose |
+|-----------------|--------------|----------|
+| Google Web Search | `OxylabsGoogleSearchReader` | Search result extraction |
+| Google Search Ads | `OxylabsGoogleAdsReader` | Advertisement data |
+| Amazon Product | `OxylabsAmazonProductReader` | Product information |
+| Amazon Search | `OxylabsAmazonSearchReader` | Product search results |
+| Amazon Reviews | `OxylabsAmazonReviewsReader` | Customer reviews |
+| YouTube Transcript | `OxylabsYoutubeTranscriptReader` | Video transcriptions |
+
+#### Example: Google Search Results Extraction
+```python
+import os
+from dotenv import load_dotenv
+from llama_index.readers.oxylabs import OxylabsGoogleSearchReader
+
+load_dotenv()
+reader = OxylabsGoogleSearchReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+results = reader.load_data({
+    'query': 'best pancake recipe',
+    'parse': True
+})
+print(results[0].text)
+```
+
+### Method 2: Oxylabs Web Reader
+
+The `OxylabsWebReader` class enables data extraction from any URL:
+
+```python
+import os
+from dotenv import load_dotenv
+from llama_index.readers.web import OxylabsWebReader
+
+load_dotenv()
+reader = OxylabsWebReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+results = reader.load_data([
+    'https://sandbox.oxylabs.io/products/1',
+    'https://sandbox.oxylabs.io/products/2'
+])
+for result in results:
+    print(result.text + '\n')
+```
+
+## Building AI Search Agents
+
+Create intelligent agents that can search and analyze web content:
+
+```python
+import os
+import asyncio
+from dotenv import load_dotenv
+from llama_index.readers.oxylabs import OxylabsGoogleSearchReader
+from llama_index.core.agent.workflow import FunctionAgent
+from llama_index.llms.openai import OpenAI
+
+load_dotenv()
+reader = OxylabsGoogleSearchReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+
+def web_search(query: str) -> str:
+    results = reader.load_data({'query': query, 'parse': True})
+    return results[0].text
+
+agent = FunctionAgent(
+    tools=[web_search],
+    llm=OpenAI(model='gpt-4o-mini'),
+    max_function_calls=1,
+    system_prompt=(
+        'Craft a short Google search query to use with the `web_search` tool. '
+        'Analyze the most relevant results and answer the question.'
+    )
+)
+
+async def main():
+    response = await agent.run('How did DeepSeek affect the stock market?')
+    print(response)
+
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
+## Advanced Configuration
+
+### JavaScript Rendering
+Enable JavaScript rendering for dynamic content:
+```python
+reader = OxylabsWebReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+
+results = reader.load_data(
+    ['https://quotes.toscrape.com/js/'],
+    {'render': 'html'}
+)
+```
+
+### User Agent Simulation
+Specify different user agents for device simulation:
+```python
+reader = OxylabsWebReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+
+results = reader.load_data(
+    ['https://sandbox.oxylabs.io/products/1'],
+    {'user_agent_type': 'mobile'}
+)
+```
+
+### Target-Specific Parameters
+Use specialized parameters for specific scrapers:
+```python
+reader = OxylabsGoogleSearchReader(
+    os.getenv('OXYLABS_USERNAME'),
+    os.getenv('OXYLABS_PASSWORD')
+)
+results = reader.load_data({
+    'query': 'iphone',
+    'parse': True,
+    'domain': 'com',
+    'start_page': 2,
+    'pages': 3
+})
+```
+
+## Creating Vector Indices
+
+LlamaIndex excels at building searchable vector indices from web content:
+
+```python
+import os
+from dotenv import load_dotenv
+from llama_index.readers.web import OxylabsWebReader
+from llama_index.core import Settings, VectorStoreIndex
+from llama_index.llms.openai import OpenAI
+
+load_dotenv()
+reader = OxylabsWebReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+documents = reader.load_data([
+    'https://sandbox.oxylabs.io/products/1',
+    'https://sandbox.oxylabs.io/products/2'
+])
+
+# Configure LlamaIndex settings
+Settings.llm = OpenAI(model='gpt-4o-mini')
+
+# Create an index
+index = VectorStoreIndex.from_documents(documents)
+
+# Query the index
+query_engine = index.as_query_engine()
+response = query_engine.query('What is the main topic of these pages?')
+print(response)
+```
+
+## RAG (Retrieval-Augmented Generation) Applications
+
+Build sophisticated RAG systems with web data:
+
+### Multi-Source RAG System
+```python
+import os
+from dotenv import load_dotenv
+from llama_index.readers.oxylabs import OxylabsGoogleSearchReader
+from llama_index.readers.web import OxylabsWebReader
+from llama_index.core import VectorStoreIndex, Settings
+from llama_index.llms.openai import OpenAI
+
+load_dotenv()
+
+# Initialize readers
+google_reader = OxylabsGoogleSearchReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+web_reader = OxylabsWebReader(
+    os.getenv('OXYLABS_USERNAME'), os.getenv('OXYLABS_PASSWORD')
+)
+
+# Collect documents from multiple sources
+search_docs = google_reader.load_data({'query': 'AI market trends 2024', 'parse': True})
+web_docs = web_reader.load_data(['https://example-tech-news.com/ai-trends'])
+
+# Combine documents
+all_documents = search_docs + web_docs
+
+# Configure and create index
+Settings.llm = OpenAI(model='gpt-4o-mini')
+index = VectorStoreIndex.from_documents(all_documents)
+
+# Query the combined knowledge base
+query_engine = index.as_query_engine()
+response = query_engine.query('What are the latest AI market predictions?')
+print(response)
+```
+
+## Use Cases and Applications
+
+### Knowledge Base Creation
+- **Documentation Aggregation**: Scrape and index technical documentation
+- **News Analysis**: Aggregate and analyze news from multiple sources
+- **Research Compilation**: Gather academic and industry research
+
+### Business Intelligence
+- **Competitor Analysis**: Monitor competitor websites and analyze strategies
+- **Market Research**: Collect and analyze market data from various sources
+- **Trend Analysis**: Track industry trends across multiple platforms
+
+### Content Enhancement
+- **Fact Checking**: Verify information against authoritative sources
+- **Content Enrichment**: Add context and supporting information
+- **Citation Generation**: Automatically cite sources and references
+
+## Performance Optimization
+
+### Efficient Data Loading
+- **Batch Processing**: Load multiple documents simultaneously
+- **Caching Strategy**: Store frequently accessed content locally
+- **Selective Indexing**: Index only relevant content sections
+
+### Memory Management
+- **Document Chunking**: Split large documents into manageable pieces
+- **Index Optimization**: Use appropriate chunk sizes for better retrieval
+- **Storage Efficiency**: Optimize vector storage for query performance
+
+## Error Handling and Best Practices
+
+### Robust Error Handling
+```python
+try:
+    results = reader.load_data(urls, parameters)
+    index = VectorStoreIndex.from_documents(results)
+except Exception as e:
+    print(f"Error processing documents: {e}")
+    # Implement fallback strategy
+```
+
+### Best Practices
+- **Rate Limiting**: Respect API rate limits and implement delays
+- **Credential Management**: Secure API credentials using environment variables
+- **Monitoring**: Track usage statistics and performance metrics
+- **Incremental Updates**: Update indices incrementally rather than rebuilding
+
+## Troubleshooting
+
+### Common Issues
+- **Authentication Errors**: Verify API credentials and user permissions
+- **Memory Issues**: Reduce document size or increase available memory
+- **Index Performance**: Optimize chunk sizes and embedding dimensions
+
+### Performance Monitoring
+- **Query Response Time**: Monitor and optimize query execution speed
+- **Index Size**: Track index growth and storage requirements
+- **API Usage**: Monitor Web Scraper API consumption and costs

@@ -1,0 +1,375 @@
+# Domain, Locale, and Results Language Configuration
+
+This guide explains how to configure `domain`, `locale`, and `results_language` parameters for scraping Amazon, Google, and Bing to customize marketplace targeting, interface language, and search result localization for accurate, region-specific data extraction.
+
+## Amazon Configuration
+
+### Domain Parameter
+
+Use the `domain` parameter to specify which Amazon marketplace you want to scrape.
+
+| Domain | Marketplace | Region |
+|--------|-------------|---------|
+| `ae` | United Arab Emirates | Middle East |
+| `ca` | Canada | North America |
+| `cn` | China | Asia |
+| `co.jp` | Japan | Asia |
+| `co.uk` | United Kingdom | Europe |
+| `com` | United States | North America |
+| `com.au` | Australia | Oceania |
+| `com.be` | Belgium | Europe |
+| `com.br` | Brazil | South America |
+| `com.mx` | Mexico | North America |
+| `com.tr` | Turkey | Europe/Asia |
+| `de` | Germany | Europe |
+| `eg` | Egypt | Africa |
+| `es` | Spain | Europe |
+| `fr` | France | Europe |
+| `in` | India | Asia |
+| `it` | Italy | Europe |
+| `nl` | Netherlands | Europe |
+| `pl` | Poland | Europe |
+| `sa` | Saudi Arabia | Middle East |
+| `se` | Sweden | Europe |
+| `sg` | Singapore | Asia |
+
+### Locale Parameter
+
+The `locale` parameter sets the Amazon interface language. Not all marketplaces support all languages, and supported languages vary by marketplace.
+
+**Note**: If you want the default interface language, you don't need to send the `locale` parameter.
+
+#### Major Marketplace Locale Support
+
+**United States (com)**
+- `en_US` - English (UK) (default)
+- `es_US` - Spanish
+- `ar_AE` - Arabic
+- `de_US` - German
+- `he_IL` - Hebrew
+- `ko_KR` - Korean
+- `pt_BR` - Portuguese
+- `zh_CN` - Chinese
+- `zh_TW` - Taiwanese
+
+**Germany (de)**
+- `de_DE` - German (default)
+- `en_GB` - English (UK)
+- `cs_CZ` - Czech
+- `nl_NL` - Dutch
+- `pl_PL` - Polish
+- `tr_TR` - Turkish
+- `da_DK` - Danish
+
+**United Kingdom (co.uk)**
+- `en_GB` - English (UK) (default)
+
+**Japan (co.jp)**
+- `ja_JP` - Japanese (default)
+- `en_US` - English (UK)
+- `zh_CN` - Chinese
+
+**India (in)**
+- `en_IN` - English (UK) (default)
+- `hi_IN` - Hindi
+- `ta_IN` - Tamil
+- `te_IN` - Telugu
+- `kn_IN` - Kannada
+- `ml_IN` - Malayalam
+- `bn_IN` - Bengali
+- `mr_IN` - Marathi
+
+**Example Usage**
+```json
+{
+    "source": "amazon_search",
+    "query": "smartphone",
+    "domain": "de",
+    "locale": "de_DE"
+}
+```
+
+## Google Configuration
+
+### Domain Parameter
+
+Specify which Google top-level domain (TLD) to scrape using the `domain` parameter.
+
+**Common Google Domains:**
+- `com` - Google.com (United States)
+- `co.uk` - Google.co.uk (United Kingdom)
+- `de` - Google.de (Germany)
+- `fr` - Google.fr (France)
+- `co.jp` - Google.co.jp (Japan)
+- `com.au` - Google.com.au (Australia)
+- `ca` - Google.ca (Canada)
+
+### Locale Parameter
+
+The `locale` parameter sets the Google Search web page interface language. **This does not affect the search results language** - only the interface.
+
+**How it works:**
+- Using domain `com` with locale `de-DE` gives American results with German interface language
+- The `Accept-Language` header is set to match your locale preference
+- If no locale is specified, it defaults to match the domain (e.g., `en-US` for `com`)
+
+**Example Locale Values:**
+```
+en-ai  # Anguilla - English, domain: com.ai
+es-pr  # Puerto Rico - Spanish, domain: com.pr
+nl-sr  # Suriname - Dutch, domain: sr
+fr-ml  # Mali - French, domain: ml
+en-lb  # Lebanon - English, domain: com.lb
+fr-bf  # Burkina Faso - French, domain: bf
+es-mx  # Mexico - Spanish, domain: com.mx
+ru-ee  # Estonia - Russian, domain: ee
+```
+
+### Results Language Parameter
+
+Use the `results_language` parameter to specify the language of search results (separate from interface language).
+
+**Example Implementation:**
+```json
+{
+    "source": "google_search",
+    "query": "best restaurants",
+    "domain": "com",
+    "locale": "de-DE",
+    "results_language": "ar"
+}
+```
+
+This configuration would:
+- Search on Google.com (US results)
+- Display German interface language
+- Return results in Arabic language
+
+**Common Language Codes:**
+- `en` - English
+- `es` - Spanish
+- `fr` - French
+- `de` - German
+- `ar` - Arabic
+- `zh` - Chinese
+- `ja` - Japanese
+- `ru` - Russian
+
+## Bing Configuration
+
+### Locale Parameter
+
+Similar to Google, the `locale` parameter changes the Bing search page interface language without affecting search results.
+
+**Behavior:**
+- Domain `com` with locale `de-DE` shows American results with German interface
+- `Accept-Language` header is set to `de-DE,de;q=0.8`
+- Simulates a US user with German browser language settings
+- Defaults to domain-matching language if not specified
+
+**Example Configuration:**
+```json
+{
+    "source": "bing_search",
+    "query": "technology news",
+    "domain": "com",
+    "locale": "fr-FR"
+}
+```
+
+## Best Practices for Localization
+
+### Geographic Targeting Strategy
+
+#### Regional E-commerce Research
+```json
+{
+    "source": "amazon_search",
+    "query": "wireless headphones",
+    "domain": "de",
+    "locale": "de_DE"
+}
+```
+
+#### Multi-Market Analysis
+```python
+markets = [
+    {"domain": "com", "locale": "en_US"},     # US English
+    {"domain": "de", "locale": "de_DE"},      # German
+    {"domain": "co.jp", "locale": "ja_JP"},   # Japanese
+    {"domain": "in", "locale": "en_IN"}       # Indian English
+]
+
+for market in markets:
+    payload = {
+        "source": "amazon_search",
+        "query": "smartphone",
+        "domain": market["domain"],
+        "locale": market["locale"]
+    }
+    # Execute request for each market
+```
+
+### Search Engine Optimization
+
+#### Local SEO Research
+```json
+{
+    "source": "google_search",
+    "query": "pizza delivery",
+    "domain": "com",
+    "locale": "en-US",
+    "geo_location": "New York,New York,United States"
+}
+```
+
+#### Multilingual Content Analysis
+```json
+{
+    "source": "google_search",
+    "query": "machine learning",
+    "domain": "com",
+    "locale": "en-US",
+    "results_language": "es"
+}
+```
+
+## Advanced Configuration Examples
+
+### Multi-Language Market Research
+```python
+def scrape_multilingual_results(query, markets):
+    results = {}
+    
+    for market_name, config in markets.items():
+        payload = {
+            "source": "google_search",
+            "query": query,
+            "domain": config["domain"],
+            "locale": config["locale"],
+            "results_language": config.get("results_language", "en")
+        }
+        
+        # Store results by market
+        results[market_name] = make_request(payload)
+    
+    return results
+
+# Define target markets
+markets = {
+    "us_english": {"domain": "com", "locale": "en-US"},
+    "uk_english": {"domain": "co.uk", "locale": "en-GB"},
+    "germany": {"domain": "de", "locale": "de-DE"},
+    "france": {"domain": "fr", "locale": "fr-FR"},
+    "spain": {"domain": "es", "locale": "es-ES"}
+}
+
+results = scrape_multilingual_results("AI technology", markets)
+```
+
+### Amazon Marketplace Comparison
+```python
+def compare_amazon_prices(product_query, marketplaces):
+    price_data = {}
+    
+    for marketplace in marketplaces:
+        payload = {
+            "source": "amazon_product",
+            "query": product_query,
+            "domain": marketplace["domain"],
+            "locale": marketplace["locale"],
+            "parse": True
+        }
+        
+        price_data[marketplace["name"]] = make_request(payload)
+    
+    return price_data
+
+# Compare prices across regions
+marketplaces = [
+    {"name": "US", "domain": "com", "locale": "en_US"},
+    {"name": "UK", "domain": "co.uk", "locale": "en_GB"},
+    {"name": "Germany", "domain": "de", "locale": "de_DE"},
+    {"name": "Japan", "domain": "co.jp", "locale": "ja_JP"}
+]
+
+price_comparison = compare_amazon_prices("B07FZ8S74R", marketplaces)
+```
+
+## Troubleshooting Localization Issues
+
+### Common Problems
+
+#### Incorrect Results Language
+- **Problem**: Results appear in unexpected language
+- **Solution**: Verify `results_language` parameter is correctly set
+- **Check**: Ensure language code is supported by the target platform
+
+#### Interface Language Mismatch  
+- **Problem**: Interface appears in wrong language
+- **Solution**: Verify `locale` parameter matches desired interface language
+- **Check**: Confirm locale is supported for the selected domain
+
+#### Geographic Targeting Issues
+- **Problem**: Results don't match expected geographic region
+- **Solution**: Check domain selection and geo_location parameters
+- **Check**: Verify domain corresponds to target marketplace
+
+### Validation Steps
+
+#### Parameter Verification
+```python
+def validate_localization_params(domain, locale, results_language=None):
+    """Validate localization parameters before making request"""
+    
+    # Validate domain format
+    valid_domains = ['com', 'co.uk', 'de', 'fr', 'co.jp', 'com.au']
+    if domain not in valid_domains:
+        raise ValueError(f"Invalid domain: {domain}")
+    
+    # Validate locale format  
+    if locale and '-' not in locale:
+        raise ValueError(f"Invalid locale format: {locale}")
+    
+    # Validate language code
+    if results_language and len(results_language) != 2:
+        raise ValueError(f"Invalid language code: {results_language}")
+    
+    return True
+```
+
+#### Test Configuration
+```python
+def test_localization_config():
+    """Test different localization configurations"""
+    
+    test_configs = [
+        {"domain": "com", "locale": "en-US", "results_language": "en"},
+        {"domain": "de", "locale": "de-DE", "results_language": "de"},
+        {"domain": "co.jp", "locale": "ja-JP", "results_language": "ja"}
+    ]
+    
+    for config in test_configs:
+        try:
+            validate_localization_params(**config)
+            print(f"✓ Valid configuration: {config}")
+        except ValueError as e:
+            print(f"✗ Invalid configuration: {config} - {e}")
+
+test_localization_config()
+```
+
+## Resources and References
+
+### Documentation Links
+- **Amazon Marketplace Domains**: Complete list available in API documentation
+- **Google Domain List**: Full TLD list provided in API reference
+- **Locale Codes**: Comprehensive locale list available in JSON format
+- **Language Codes**: ISO language codes supported by each platform
+
+### Support and Assistance
+- **Technical Support**: Contact support@oxylabs.io for localization issues
+- **Implementation Help**: 24/7 live chat available for configuration assistance
+- **Best Practices**: Consult documentation for platform-specific recommendations
+
+This comprehensive localization guide ensures accurate geographic and linguistic targeting for your web scraping projects across Amazon, Google, and Bing platforms.
