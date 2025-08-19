@@ -134,6 +134,10 @@ curl -X POST \
   ]
 }
 ```
+---
+## Example Prompts
+
+See `example_prompts.txt` for a curated list of test questions covering authentication, pricing, proxy usage, and more.
 
 ---
 
@@ -148,65 +152,6 @@ The Swagger interface provides:
 - Request/response examples  
 - Direct endpoint testing
 - Parameter validation and error handling
-
----
-
-## System Showcase
-
-### Running Locally
-
-After starting the application locally, you can test the system with these Oxylabs-specific queries:
-
-#### Authentication & Setup
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "How do I set up authentication credentials for Oxylabs Web Scraper API?"}'
-```
-
-**Expected Response:**
-```json
-{
-  "answer": "To set up authentication for Oxylabs Web Scraper API, create your credentials in the Oxylabs dashboard by signing up for a free trial or purchasing the service. You'll receive a USERNAME and PASSWORD for HTTP Basic Authentication or API token for bearer token authentication.",
-  "sources": ["./data/authentication.txt", "./data/getting_started.txt"]
-}
-```
-
-#### Pricing Information
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What are the pricing models for Oxylabs proxy services?"}'
-```
-
-**Expected Response:**
-```json
-{
-  "answer": "Oxylabs offers multiple pricing models including pay-per-use for occasional scraping, monthly subscriptions for regular usage, and enterprise plans for high-volume operations. Residential proxies are typically priced per GB of traffic, while datacenter proxies use per-IP pricing models.",
-  "sources": ["./data/pricing.txt", "./data/proxy_types.txt"]
-}
-```
-
-#### Technical Implementation
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "How can I integrate Oxylabs with Python requests library?"}'
-```
-
-**Expected Response:**
-```json
-{
-  "answer": "To integrate Oxylabs with Python requests, configure the proxies parameter with your endpoint and use auth parameter for credentials. Set headers like User-Agent and handle session management for optimal performance. Always implement proper error handling and retry logic.",
-  "sources": ["./data/python_integration.txt", "./data/code_examples.txt"]
-}
-```
-
----
-
-## Example Prompts
-
-See `example_prompts.txt` for a curated list of test questions covering authentication, pricing, proxy usage, and more.
 
 ---
 
