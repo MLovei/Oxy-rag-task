@@ -2,9 +2,6 @@
 
 A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAPI, LangChain, ChromaDB, and OpenAI. It ingests Oxylabs developer documentation (.txt files), creates semantic embeddings, and answers user queries by retrieving relevant document chunks and generating concise responses.
 
----
-
-[![Build Status](https://img.shields.io/github/actions/workflow/status/username/oxylabs-rag/ci.yml)](https://github.com/username/oxylabs-rag/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Table of Contents
 
