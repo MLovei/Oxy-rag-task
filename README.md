@@ -4,6 +4,8 @@ A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAP
 
 ---
 
+[![Build Status](https://img.shields.io/github/actions/workflow/status/username/oxylabs-rag/ci.yml)](https://github.com/username/oxylabs-rag/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 ## Table of Contents
 
 - [Features](#features)  
@@ -25,7 +27,7 @@ A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAP
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Markdown-aware chunking**: Splits documents using `MarkdownTextSplitter` for logical chunk boundaries.  
 - **Configurable settings**: Centralized with Pydantic `BaseSettings` and `.env` support.  
@@ -37,7 +39,7 @@ A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAP
 
 ---
 
-## 📦 Repository Structure
+## Repository Structure
 
 ```text
 ├── data/                # Input .txt documentation files for chunking
@@ -52,7 +54,7 @@ A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAP
 
 ---
 
-## 🔧 Prerequisites
+## Prerequisites
 
 - Docker & Docker Compose  
 - OpenAI API key with sufficient quota  
@@ -60,7 +62,7 @@ A fast, containerized Retrieval-Augmented Generation (RAG) API built with FastAP
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Create a `.env` file in the project root with your OpenAI API key:
 
@@ -72,7 +74,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 ---
 
-## 🛠️ Installation & Running
+## Installation & Running
 
 ### Local without Docker
 
@@ -102,7 +104,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 ---
 
-## 🎯 API Usage
+## API Usage
 
 ### Health Check
 
@@ -138,7 +140,7 @@ curl -X POST \
 
 ---
 
-## 🧪 Testing the LLM
+## Testing the LLM
 
 Use the built-in Swagger UI to interactively test endpoints and your retrieval-augmented LLM:
 
@@ -152,33 +154,66 @@ The Swagger interface provides:
 
 ---
 
-## 🎪 System Showcase
+## System Showcase
 
 ### Running Locally
 
 After starting the application locally, you can test the system with these Oxylabs-specific queries:
 
 #### Authentication & Setup
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "How do I set up authentication credentials for Oxylabs Web Scraper API?"}'
+```
+
+**Expected Response:**
 ```json
 {
-  "answer": "To authenticate with the Web Scraper API, you need to create your API user credentials by signing up for a free trial or purchasing the product in the Oxylabs dashboard. This will provide you with a `USERNAME` and `PASSWORD` that you can use for authentication.",
-  "sources": [
-    "./data/getting_started.txt",
-    "./data/LangChain.txt",
-    "./data/cloud_storage.txt"
-  ]
+  "answer": "To set up authentication for Oxylabs Web Scraper API, create your credentials in the Oxylabs dashboard by signing up for a free trial or purchasing the service. You'll receive a USERNAME and PASSWORD for HTTP Basic Authentication or API token for bearer token authentication.",
+  "sources": ["./data/authentication.txt", "./data/getting_started.txt"]
+}
+```
+
+#### Pricing Information
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What are the pricing models for Oxylabs proxy services?"}'
+```
+
+**Expected Response:**
+```json
+{
+  "answer": "Oxylabs offers multiple pricing models including pay-per-use for occasional scraping, monthly subscriptions for regular usage, and enterprise plans for high-volume operations. Residential proxies are typically priced per GB of traffic, while datacenter proxies use per-IP pricing models.",
+  "sources": ["./data/pricing.txt", "./data/proxy_types.txt"]
+}
+```
+
+#### Technical Implementation
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "How can I integrate Oxylabs with Python requests library?"}'
+```
+
+**Expected Response:**
+```json
+{
+  "answer": "To integrate Oxylabs with Python requests, configure the proxies parameter with your endpoint and use auth parameter for credentials. Set headers like User-Agent and handle session management for optimal performance. Always implement proper error handling and retry logic.",
+  "sources": ["./data/python_integration.txt", "./data/code_examples.txt"]
 }
 ```
 
 ---
 
-## 📝 Example Prompts
+## Example Prompts
 
 See `example_prompts.txt` for a curated list of test questions covering authentication, pricing, proxy usage, and more.
 
 ---
 
-## ⚠️ Current Limitations
+## Current Limitations
 
 ### 1. **Vector Store Persistence**
 - ChromaDB runs in-memory during development, losing data on container restarts
@@ -217,7 +252,7 @@ See `example_prompts.txt` for a curated list of test questions covering authenti
 
 ---
 
-## 🏗️ Production-Ready Improvements
+## Production-Ready Improvements
 
 ### **Scalability & Performance**
 
@@ -380,20 +415,20 @@ def optimize_context(chunks: List[str], max_tokens: int = 4000) -> List[str]:
 
 ---
 
-## 📈 Monitoring & Logging
+## Monitoring & Logging
 
 - Logs are output to the console and can be routed to a file or centralized logger.  
 - Customize `logging.basicConfig` in `main.py` to integrate with external monitoring tools.  
 
 ---
 
-## 🔒 Security & Authentication
+## Security & Authentication
 
 For production, protect the `/query` endpoint with API keys or JWTs. FastAPI's `fastapi.security` module can be used to implement this.
 
 ---
 
-## 🔄 Data Freshness
+## Data Freshness
 
 To refresh the vector store without restarting, consider adding an admin endpoint (`POST /reload_docs`) that calls:
 
@@ -404,7 +439,7 @@ vectordb.persist()
 
 ---
 
-## 💡 Future Improvements
+## Future Improvements
 
 - **Multi-language Support**: Support for documentation in multiple languages
 - **Advanced RAG Techniques**: Implement RAG-Fusion, Self-RAG, or Corrective RAG
@@ -414,6 +449,6 @@ vectordb.persist()
 
 ---
 
-## 🏁 Credits
+## Credits
 
 Built with ❤️ using FastAPI, LangChain, ChromaDB, and OpenAI APIs.
